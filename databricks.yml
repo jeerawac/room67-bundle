@@ -88,3 +88,22 @@ resources:
             notebook_path: ./src/infer_demo.py
             base_parameters:
               catalog: ${var.catalog}
+
+    run_tests_job:
+      name: "Room67 - Tests"
+      permissions:
+        - group_name: users
+          level: CAN_VIEW
+        - user_name: jakkrits@ais.co.th
+          level: CAN_MANAGE
+        - user_name: phonkrii@ais.co.th
+          level: CAN_MANAGE
+        - user_name: supakorj@ais.co.th
+          level: CAN_MANAGE
+      tasks:
+        - task_key: run_tests
+          existing_cluster_id: 0318-031919-b3fa4xtr
+          notebook_task:
+            notebook_path: ./src/run_tests.py
+            base_parameters:
+              repo_root: ${workspace.file_path}
