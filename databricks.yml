@@ -15,6 +15,7 @@ targets:
     default: true
     workspace:
       host: https://adb-1502583690645883.3.azuredatabricks.net
+      profile: training
     variables:
       catalog: ctl_training_dev
 
