@@ -18,7 +18,10 @@ def test_notebook_paths_exist_on_disk(job_key, job):
         if notebook_task is None:
             continue
         notebook_path = (REPO_ROOT / notebook_task["notebook_path"]).resolve()
-        assert notebook_path.is_file(), f"{job_key}/{task['task_key']}: missing {notebook_path}"
+        # Deployed as a Databricks job, notebook-source .py files are imported as
+        # Notebook objects with the extension stripped, so check both forms.
+        exists = notebook_path.is_file() or notebook_path.with_suffix("").is_file()
+        assert exists, f"{job_key}/{task['task_key']}: missing {notebook_path}"
 
 
 @pytest.mark.parametrize("job_key,job", all_jobs())

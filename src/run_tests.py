@@ -16,6 +16,8 @@ dbutils.library.restartPython()  # noqa: F821
 
 import sys
 
+sys.dont_write_bytecode = True
+
 import pytest
 
 dbutils.widgets.text("repo_root", "")  # noqa: F821
