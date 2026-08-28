@@ -5,12 +5,12 @@ SCHEMA = "m3"
 
 
 def trips_table(catalog: str) -> str:
-    return f"{catalog}.{SCHEMA}.namaew_trips_raw"
+    return f"{catalog}.{SCHEMA}.room67_trips_raw"
 
 
 def predictions_table(catalog: str) -> str:
-    return f"{catalog}.{SCHEMA}.namaew_predictions"
+    return f"{catalog}.{SCHEMA}.room67_predictions"
 
 
 def model_name(catalog: str) -> str:
-    return f"{catalog}.{SCHEMA}.namaew_fare_model"
+    return f"{catalog}.{SCHEMA}.room67_fare_model"

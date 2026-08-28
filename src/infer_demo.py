@@ -27,7 +27,7 @@ BUNDLE_ROOT = dbutils.widgets.get("bundle_root")  # noqa: F821
 if BUNDLE_ROOT and f"{BUNDLE_ROOT}/src" not in sys.path:
     sys.path.append(f"{BUNDLE_ROOT}/src")
 
-from namaew.naming import model_name, predictions_table as predictions_table_name, trips_table  # noqa: E402
+from room67.naming import model_name, predictions_table as predictions_table_name, trips_table  # noqa: E402
 
 catalog = dbutils.widgets.get("catalog")  # noqa: F821
 source_table = trips_table(catalog)

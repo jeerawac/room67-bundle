@@ -1,4 +1,4 @@
-"""Tests over the data-quality expectations in namaew/checks.py.
+"""Tests over the data-quality expectations in room67/checks.py.
 
 These expectations are what audit_quality.py runs against the real table
 after every ingest. These tests prove the expectations themselves work: each
@@ -7,7 +7,7 @@ one is shown passing on a clean fixture and catching an injected fault.
 
 import pytest
 
-from namaew.checks import audit, completeness_violations, validity_violations, volume_violations
+from room67.checks import audit, completeness_violations, validity_violations, volume_violations
 
 pytestmark = pytest.mark.spark
 

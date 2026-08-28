@@ -37,7 +37,7 @@ def volume_violations(df: DataFrame, min_rows: int) -> list:
 
 
 def audit(df: DataFrame) -> list:
-    """The full expectation suite for namaew_trips_raw, in one call."""
+    """The full expectation suite for room67_trips_raw, in one call."""
     return (
         volume_violations(df, 1)
         + completeness_violations(df, ["trip_distance", "fare_amount"])

@@ -2,7 +2,7 @@
 # MAGIC %md
 # MAGIC # Data-quality audit — against the table `ingest` just wrote
 # MAGIC
-# MAGIC The expectations in `namaew/checks.py` are proved against fixtures by
+# MAGIC The expectations in `room67/checks.py` are proved against fixtures by
 # MAGIC `tests/test_checks.py` on the runner. This task runs the same functions
 # MAGIC against the table the ingest task just wrote, which is the only place the
 # MAGIC quality of this month's data can be established.
@@ -22,8 +22,8 @@ BUNDLE_ROOT = dbutils.widgets.get("bundle_root")  # noqa: F821
 if BUNDLE_ROOT and f"{BUNDLE_ROOT}/src" not in sys.path:
     sys.path.append(f"{BUNDLE_ROOT}/src")
 
-from namaew.checks import audit  # noqa: E402
-from namaew.naming import trips_table  # noqa: E402
+from room67.checks import audit  # noqa: E402
+from room67.naming import trips_table  # noqa: E402
 
 catalog = dbutils.widgets.get("catalog")  # noqa: F821
 TABLE = trips_table(catalog)

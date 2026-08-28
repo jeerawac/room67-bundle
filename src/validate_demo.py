@@ -2,7 +2,7 @@
 
 # Gate: fail if the freshly trained model's RMSE is above threshold. On
 # pass, tag the model version as "champion" so the inference notebook
-# picks it up. The comparison itself lives in namaew/gate.py.
+# picks it up. The comparison itself lives in room67/gate.py.
 
 # COMMAND ----------
 
@@ -24,8 +24,8 @@ BUNDLE_ROOT = dbutils.widgets.get("bundle_root")  # noqa: F821
 if BUNDLE_ROOT and f"{BUNDLE_ROOT}/src" not in sys.path:
     sys.path.append(f"{BUNDLE_ROOT}/src")
 
-from namaew.gate import exceeds_threshold  # noqa: E402
-from namaew.naming import model_name  # noqa: E402
+from room67.gate import exceeds_threshold  # noqa: E402
+from room67.naming import model_name  # noqa: E402
 
 catalog = dbutils.widgets.get("catalog")  # noqa: F821
 rmse_threshold = float(dbutils.widgets.get("rmse_threshold"))  # noqa: F821

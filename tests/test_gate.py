@@ -1,6 +1,6 @@
-"""Unit tests over the RMSE gate in namaew/gate.py."""
+"""Unit tests over the RMSE gate in room67/gate.py."""
 
-from namaew.gate import exceeds_threshold
+from room67.gate import exceeds_threshold
 
 
 def test_rmse_under_threshold_passes():

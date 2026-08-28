@@ -66,7 +66,7 @@ def spark():
 
 @pytest.fixture
 def trips_frame(spark):
-    """A clean namaew_trips_raw fixture: no nulls, no negative values."""
+    """A clean room67_trips_raw fixture: no nulls, no negative values."""
     rows = [
         (1.2, 8.5),
         (3.4, 15.0),

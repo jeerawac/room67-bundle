@@ -1,11 +1,11 @@
-"""Unit tests over the pure function in namaew/dates.py.
+"""Unit tests over the pure function in room67/dates.py.
 
 No Spark, no clock, no workspace. Milliseconds, and they run on every push.
 """
 
 from datetime import date
 
-from namaew.dates import day_of_month
+from room67.dates import day_of_month
 
 
 def test_day_of_month_reads_the_day_field():

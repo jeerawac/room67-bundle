@@ -4,25 +4,25 @@ Databricks Asset Bundle demo: monthly retrain + daily inference pipeline on the 
 
 ## Pipeline
 
-Job `namaew` runs daily (`0 0 2 * * ?` UTC):
+Job `room67` runs daily (`0 0 2 * * ?` UTC):
 
 1. **check_date** — reads day of month, sets task value.
 2. **gate_retrain** — condition task, true only on the 1st.
 3. If retrain gate true: **ingest** → **data_quality** → **train** → **validate** (Write-Audit-Publish: each of the last two fails the run rather than letting a bad table or a bad model flow downstream)
-   - `ingest_nyctaxi.py`: copies a 5000-row slice of `samples.nyctaxi.trips` into `{catalog}.m3.namaew_trips_raw`.
+   - `ingest_nyctaxi.py`: copies a 5000-row slice of `samples.nyctaxi.trips` into `{catalog}.m3.room67_trips_raw`.
    - `audit_quality.py`: fails the run if the table just written has nulls, negative values, or is empty.
-   - `train_demo.py`: fits `LinearRegression` (fare_amount ~ trip_distance), logs run + registers model to Unity Catalog as `{catalog}.m3.namaew_fare_model`.
+   - `train_demo.py`: fits `LinearRegression` (fare_amount ~ trip_distance), logs run + registers model to Unity Catalog as `{catalog}.m3.room67_fare_model`.
    - `validate_demo.py`: fails the run if RMSE > `rmse_threshold`; otherwise aliases the new version `champion`.
-4. **infer** — runs `run_if: ALL_DONE` after gate/validate; scores current `champion` model against raw table, writes to `{catalog}.m3.namaew_predictions`. Skips gracefully (writes a `status="skipped"` row) if no champion exists yet.
+4. **infer** — runs `run_if: ALL_DONE` after gate/validate; scores current `champion` model against raw table, writes to `{catalog}.m3.room67_predictions`. Skips gracefully (writes a `status="skipped"` row) if no champion exists yet.
 
-The notebooks in `src/` are thin: widgets in, `spark`/`mlflow` calls out. The actual rules — date math, table/model naming, the RMSE gate, the data-quality expectations, the model fit/eval — live in the importable package `src/namaew/`, which is what `tests/` exercises directly.
+The notebooks in `src/` are thin: widgets in, `spark`/`mlflow` calls out. The actual rules — date math, table/model naming, the RMSE gate, the data-quality expectations, the model fit/eval — live in the importable package `src/room67/`, which is what `tests/` exercises directly.
 
 ## Repo layout
 
 ```
 databricks.yml            bundle config, includes resources/*.yml
 resources/
-  namaew.job.yml           the pipeline job
+  room67.job.yml           the pipeline job
 src/
   check_date.py            gate: day-of-month check
   ingest_nyctaxi.py        ingest sample data
@@ -30,7 +30,7 @@ src/
   train_demo.py            train + register model
   validate_demo.py         RMSE gate + promote to champion
   infer_demo.py            score champion model
-  namaew/
+  room67/
     dates.py                day-of-month logic
     naming.py                table/model naming
     model.py                  fit + evaluate (pandas/scikit-learn only)

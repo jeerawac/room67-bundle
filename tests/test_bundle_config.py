@@ -48,7 +48,7 @@ def test_depends_on_task_keys_exist_in_same_job(job_key, job):
 
 
 def test_gate_retrain_has_both_true_and_false_consumers():
-    job = JOBS["namaew"][0]
+    job = JOBS["room67"][0]
     outcomes = {
         dep.get("outcome")
         for task in job["tasks"]

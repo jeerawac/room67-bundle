@@ -1,11 +1,11 @@
-"""Tests over namaew/model.py: pandas and scikit-learn only, no Spark, so
+"""Tests over room67/model.py: pandas and scikit-learn only, no Spark, so
 these run on the GitHub runner exactly as train_demo.py runs on the cluster.
 """
 
 import pandas as pd
 import pytest
 
-from namaew.model import fit_and_evaluate
+from room67.model import fit_and_evaluate
 
 
 def _linear_frame(n=40, noise=0.0):

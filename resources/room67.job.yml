@@ -9,7 +9,7 @@
 
 resources:
   jobs:
-    namaew:
+    room67:
       name: "Room67"
       schedule:
         quartz_cron_expression: "0 0 2 * * ?"

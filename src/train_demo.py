@@ -3,7 +3,7 @@
 # Demo training: fit a trivial linear model (fare_amount ~ trip_distance) on
 # the table the ingest+audit tasks already vouched for. Not production ML,
 # just a smoke test that a downstream task can read the ingested data. The
-# fit/eval logic lives in namaew/model.py, unit-tested without Spark.
+# fit/eval logic lives in room67/model.py, unit-tested without Spark.
 
 # COMMAND ----------
 
@@ -26,7 +26,7 @@ BUNDLE_ROOT = dbutils.widgets.get("bundle_root")  # noqa: F821
 if BUNDLE_ROOT and f"{BUNDLE_ROOT}/src" not in sys.path:
     sys.path.append(f"{BUNDLE_ROOT}/src")
 
-from namaew.naming import model_name, trips_table  # noqa: E402
+from room67.naming import model_name, trips_table  # noqa: E402
 
 catalog = dbutils.widgets.get("catalog")  # noqa: F821
 table = trips_table(catalog)
@@ -35,7 +35,7 @@ table = trips_table(catalog)
 
 import mlflow
 
-from namaew.model import fit_and_evaluate
+from room67.model import fit_and_evaluate
 
 pdf = spark.table(table).dropna(subset=["trip_distance", "fare_amount"]).toPandas()  # noqa: F821
 
