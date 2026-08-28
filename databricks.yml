@@ -1,3 +1,17 @@
+# nyctaxi_demo — the bundle the monthly-retrain/daily-infer pipeline deploys.
+#
+# One job, six tasks: date gate, then (on the 1st) ingest -> data_quality ->
+# train -> validate -> infer; other days skip straight to infer against the
+# current champion model.
+#
+#   - existing_cluster_id pinned through the cluster_id variable, because the
+#     training workspace does not permit this credential to create clusters.
+#   - dev is the only target: this is a personal demo bundle, not a graded
+#     pipeline with a prod promotion path.
+#
+# This file sits at the ROOT of the repository, so the repository IS the
+# bundle: no `working-directory` anywhere in the workflows.
+
 bundle:
   name: nyctaxi_demo
 
@@ -5,14 +19,24 @@ include:
   - resources/*.yml
 
 variables:
+
   catalog:
     description: The catalog the ingest/train tasks read and write
     default: ctl_training_dev
+
   rmse_threshold:
     description: Max acceptable RMSE for a freshly trained model to be promoted
     default: "5.0"
 
+  # Pinned to the training workspace's one all-purpose cluster. The id is
+  # workspace-specific: the credential may not create clusters, and a
+  # permission outranks a preference.
+  cluster_id:
+    description: Id of the existing all-purpose cluster the tasks run on
+    default: 0318-031919-b3fa4xtr
+
 targets:
+
   dev:
     mode: development
     default: true
@@ -20,3 +44,18 @@ targets:
       host: https://adb-1502583690645883.3.azuredatabricks.net
     variables:
       catalog: ctl_training_dev
+    permissions:
+      # The workspace already grants this on the .bundle folder, and a
+      # bundle's permissions are declarative: anything present on the folder
+      # but absent here is reported by `bundle validate` as drift
+      # ("workspace folder has permissions not configured in bundle").
+      - user_name: ${workspace.current_user.userName}
+        level: CAN_MANAGE
+      - group_name: users
+        level: CAN_VIEW
+      - user_name: jakkrits@ais.co.th
+        level: CAN_MANAGE
+      - user_name: phonkrii@ais.co.th
+        level: CAN_MANAGE
+      - user_name: supakorj@ais.co.th
+        level: CAN_MANAGE

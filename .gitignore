@@ -1,3 +1,6 @@
+# Databricks Asset Bundle local state
+.databricks/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

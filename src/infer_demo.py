@@ -14,26 +14,34 @@ dbutils.library.restartPython()  # noqa: F821
 
 # COMMAND ----------
 
+import sys
+
 import mlflow
 from loguru import logger
 from pyspark.sql import functions as F
 
 dbutils.widgets.text("catalog", "ctl_training_dev")  # noqa: F821
-catalog = dbutils.widgets.get("catalog")  # noqa: F821
+dbutils.widgets.text("bundle_root", "")  # noqa: F821
 
-schema = "m3"
-source_table = f"{catalog}.{schema}.namaew_trips_raw"
-predictions_table = f"{catalog}.{schema}.namaew_predictions"
-model_name = f"{catalog}.{schema}.namaew_fare_model"
+BUNDLE_ROOT = dbutils.widgets.get("bundle_root")  # noqa: F821
+if BUNDLE_ROOT and f"{BUNDLE_ROOT}/src" not in sys.path:
+    sys.path.append(f"{BUNDLE_ROOT}/src")
+
+from namaew.naming import model_name, predictions_table as predictions_table_name, trips_table  # noqa: E402
+
+catalog = dbutils.widgets.get("catalog")  # noqa: F821
+source_table = trips_table(catalog)
+predictions_table = predictions_table_name(catalog)
+registered_name = model_name(catalog)
 
 # COMMAND ----------
 
 mlflow.set_registry_uri("databricks-uc")
 
 try:
-    predict_udf = mlflow.pyfunc.spark_udf(spark, model_uri=f"models:/{model_name}@champion", result_type="double")  # noqa: F821
+    predict_udf = mlflow.pyfunc.spark_udf(spark, model_uri=f"models:/{registered_name}@champion", result_type="double")  # noqa: F821
 except Exception:
-    logger.warning(f"no champion version for {model_name} yet, nothing to score")
+    logger.warning(f"no champion version for {registered_name} yet, nothing to score")
     skipped = spark.createDataFrame(  # noqa: F821
         [(None, None, "skipped: no champion model")],
         "predicted_fare_amount double, scored_at timestamp, status string",

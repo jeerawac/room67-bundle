@@ -1,0 +1,11 @@
+pytest==8.2.0
+pyyaml==6.0.2
+pyspark==3.5.4
+pandas==2.2.3
+numpy==1.26.4
+scikit-learn==1.5.2
+ruff==0.6.9
+
+# mlflow is deliberately NOT here. Nothing on the runner imports it: only
+# train_demo.py / validate_demo.py / infer_demo.py do, and those notebooks
+# run on the Databricks Runtime, where mlflow is already installed.

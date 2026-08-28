@@ -13,21 +13,33 @@ dbutils.library.restartPython()  # noqa: F821
 
 # COMMAND ----------
 
+import sys
+
 from loguru import logger
 
 dbutils.widgets.text("catalog", "ctl_training_dev")  # noqa: F821
-catalog = dbutils.widgets.get("catalog")  # noqa: F821
+dbutils.widgets.text("bundle_root", "")  # noqa: F821
 
-schema = "m3"
-table = f"{catalog}.{schema}.namaew_trips_raw"
+BUNDLE_ROOT = dbutils.widgets.get("bundle_root")  # noqa: F821
+if BUNDLE_ROOT and f"{BUNDLE_ROOT}/src" not in sys.path:
+    sys.path.append(f"{BUNDLE_ROOT}/src")
+
+from namaew.naming import SCHEMA, trips_table  # noqa: E402
+
+catalog = dbutils.widgets.get("catalog")  # noqa: F821
+table = trips_table(catalog)
 
 # COMMAND ----------
 
-spark.sql(f"CREATE SCHEMA IF NOT EXISTS {catalog}.{schema}")  # noqa: F821
+spark.sql(f"CREATE SCHEMA IF NOT EXISTS {catalog}.{SCHEMA}")  # noqa: F821
 
 df = (
     spark.table("samples.nyctaxi.trips")  # noqa: F821
     .select("tpep_pickup_datetime", "tpep_dropoff_datetime", "trip_distance", "fare_amount")
+    # dropna before the row cap: namaew_trips_raw is what audit_quality's
+    # completeness check judges, and downstream tasks rely on that promise
+    # (train_demo.py trains on it directly, infer_demo.py scores it as-is).
+    .dropna(subset=["trip_distance", "fare_amount"])
     .limit(5000)
 )
 

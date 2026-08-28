@@ -1,16 +1,16 @@
+# The deployed pipeline: date gate, then (on the 1st) build -> audit ->
+# train -> validate -> infer; other days skip straight to infer.
+#
+# data_quality and validate are Write-Audit-Publish gates: each fails the
+# run rather than letting a bad table or a bad model flow downstream.
+# data_quality is proved against fixtures by tests/test_checks.py on the
+# runner; this task runs the same functions against the table `ingest` just
+# wrote, which is the only place this month's data can be judged.
+
 resources:
   jobs:
-    namaew_job:
+    namaew:
       name: "Room67"
-      permissions:
-        - group_name: users
-          level: CAN_VIEW
-        - user_name: jakkrits@ais.co.th
-          level: CAN_MANAGE
-        - user_name: phonkrii@ais.co.th
-          level: CAN_MANAGE
-        - user_name: supakorj@ais.co.th
-          level: CAN_MANAGE
       schedule:
         quartz_cron_expression: "0 0 2 * * ?"
         timezone_id: UTC
@@ -21,9 +21,12 @@ resources:
           default: ${var.rmse_threshold}
       tasks:
         - task_key: check_date
-          existing_cluster_id: 0318-031919-b3fa4xtr
+          existing_cluster_id: ${var.cluster_id}
           notebook_task:
             notebook_path: ../src/check_date.py
+            base_parameters:
+              bundle_root: ${workspace.file_path}
+
         - task_key: gate_retrain
           depends_on:
             - task_key: check_date
@@ -31,40 +34,52 @@ resources:
             op: EQUAL_TO
             left: "{{tasks.check_date.values.day_of_month}}"
             right: "1"
+
         - task_key: ingest
           depends_on:
             - task_key: gate_retrain
               outcome: "true"
-          existing_cluster_id: 0318-031919-b3fa4xtr
+          existing_cluster_id: ${var.cluster_id}
           notebook_task:
             notebook_path: ../src/ingest_nyctaxi.py
-            base_parameters:
+            base_parameters: &params
               catalog: ${var.catalog}
-        - task_key: train
+              bundle_root: ${workspace.file_path}
+
+        - task_key: data_quality
           depends_on:
             - task_key: ingest
-          existing_cluster_id: 0318-031919-b3fa4xtr
+          existing_cluster_id: ${var.cluster_id}
+          notebook_task:
+            notebook_path: ../src/audit_quality.py
+            base_parameters: *params
+
+        - task_key: train
+          depends_on:
+            - task_key: data_quality
+          existing_cluster_id: ${var.cluster_id}
           notebook_task:
             notebook_path: ../src/train_demo.py
-            base_parameters:
-              catalog: ${var.catalog}
+            base_parameters: *params
+
         - task_key: validate
           depends_on:
             - task_key: train
-          existing_cluster_id: 0318-031919-b3fa4xtr
+          existing_cluster_id: ${var.cluster_id}
           notebook_task:
             notebook_path: ../src/validate_demo.py
             base_parameters:
               catalog: ${var.catalog}
               rmse_threshold: ${var.rmse_threshold}
+              bundle_root: ${workspace.file_path}
+
         - task_key: infer
           depends_on:
             - task_key: gate_retrain
               outcome: "false"
             - task_key: validate
           run_if: ALL_DONE
-          existing_cluster_id: 0318-031919-b3fa4xtr
+          existing_cluster_id: ${var.cluster_id}
           notebook_task:
             notebook_path: ../src/infer_demo.py
-            base_parameters:
-              catalog: ${var.catalog}
+            base_parameters: *params
