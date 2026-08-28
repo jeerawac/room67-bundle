@@ -1,6 +1,9 @@
 bundle:
   name: nyctaxi_demo
 
+include:
+  - resources/*.yml
+
 variables:
   catalog:
     description: The catalog the ingest/train tasks read and write
@@ -15,96 +18,5 @@ targets:
     default: true
     workspace:
       host: https://adb-1502583690645883.3.azuredatabricks.net
-      profile: training
     variables:
       catalog: ctl_training_dev
-
-resources:
-  jobs:
-    namaew_job:
-      name: "Room67"
-      permissions:
-        - group_name: users
-          level: CAN_VIEW
-        - user_name: jakkrits@ais.co.th
-          level: CAN_MANAGE
-        - user_name: phonkrii@ais.co.th
-          level: CAN_MANAGE
-        - user_name: supakorj@ais.co.th
-          level: CAN_MANAGE
-      schedule:
-        quartz_cron_expression: "0 0 2 * * ?"
-        timezone_id: UTC
-      parameters:
-        - name: catalog
-          default: ${var.catalog}
-        - name: rmse_threshold
-          default: ${var.rmse_threshold}
-      tasks:
-        - task_key: check_date
-          existing_cluster_id: 0318-031919-b3fa4xtr
-          notebook_task:
-            notebook_path: ./src/check_date.py
-        - task_key: gate_retrain
-          depends_on:
-            - task_key: check_date
-          condition_task:
-            op: EQUAL_TO
-            left: "{{tasks.check_date.values.day_of_month}}"
-            right: "1"
-        - task_key: ingest
-          depends_on:
-            - task_key: gate_retrain
-              outcome: "true"
-          existing_cluster_id: 0318-031919-b3fa4xtr
-          notebook_task:
-            notebook_path: ./src/ingest_nyctaxi.py
-            base_parameters:
-              catalog: ${var.catalog}
-        - task_key: train
-          depends_on:
-            - task_key: ingest
-          existing_cluster_id: 0318-031919-b3fa4xtr
-          notebook_task:
-            notebook_path: ./src/train_demo.py
-            base_parameters:
-              catalog: ${var.catalog}
-        - task_key: validate
-          depends_on:
-            - task_key: train
-          existing_cluster_id: 0318-031919-b3fa4xtr
-          notebook_task:
-            notebook_path: ./src/validate_demo.py
-            base_parameters:
-              catalog: ${var.catalog}
-              rmse_threshold: ${var.rmse_threshold}
-        - task_key: infer
-          depends_on:
-            - task_key: gate_retrain
-              outcome: "false"
-            - task_key: validate
-          run_if: ALL_DONE
-          existing_cluster_id: 0318-031919-b3fa4xtr
-          notebook_task:
-            notebook_path: ./src/infer_demo.py
-            base_parameters:
-              catalog: ${var.catalog}
-
-    run_tests_job:
-      name: "Room67 - Tests"
-      permissions:
-        - group_name: users
-          level: CAN_VIEW
-        - user_name: jakkrits@ais.co.th
-          level: CAN_MANAGE
-        - user_name: phonkrii@ais.co.th
-          level: CAN_MANAGE
-        - user_name: supakorj@ais.co.th
-          level: CAN_MANAGE
-      tasks:
-        - task_key: run_tests
-          existing_cluster_id: 0318-031919-b3fa4xtr
-          notebook_task:
-            notebook_path: ./src/run_tests.py
-            base_parameters:
-              repo_root: ${workspace.file_path}
