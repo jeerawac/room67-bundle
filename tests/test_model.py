@@ -18,14 +18,14 @@ def _linear_frame(n=40, noise=0.0):
 
 def test_fit_and_evaluate_is_deterministic_given_the_same_seed():
     frame = _linear_frame()
-    _, rmse_a, _ = fit_and_evaluate(frame, random_state=1)
-    _, rmse_b, _ = fit_and_evaluate(frame, random_state=1)
+    _, rmse_a, _, _, _ = fit_and_evaluate(frame, random_state=1)
+    _, rmse_b, _, _, _ = fit_and_evaluate(frame, random_state=1)
     assert rmse_a == rmse_b
 
 
 def test_fit_and_evaluate_recovers_a_clean_linear_relationship():
     """No noise: the held-out RMSE should be ~0."""
-    model, rmse, _ = fit_and_evaluate(_linear_frame())
+    model, rmse, _, _, _ = fit_and_evaluate(_linear_frame())
     assert rmse < 1e-6
     prediction = model.predict(pd.DataFrame({"trip_distance": [10.0]}))[0]
     assert prediction == pytest.approx(2.5 + 3.0 * 10.0, abs=1e-6)
@@ -33,5 +33,12 @@ def test_fit_and_evaluate_recovers_a_clean_linear_relationship():
 
 def test_fit_and_evaluate_splits_the_frame_by_test_size():
     frame = _linear_frame(n=40)
-    _, _, train_df = fit_and_evaluate(frame, test_size=0.25)
+    _, _, train_df, test_df, _ = fit_and_evaluate(frame, test_size=0.25)
     assert len(train_df) == 30
+    assert len(test_df) == 10
+
+
+def test_fit_and_evaluate_returns_predictions_aligned_with_test_df():
+    frame = _linear_frame(n=40)
+    _, _, _, test_df, predictions = fit_and_evaluate(frame, test_size=0.25)
+    assert len(predictions) == len(test_df)
