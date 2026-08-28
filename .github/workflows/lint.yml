@@ -1,4 +1,4 @@
-name: Test
+name: Lint
 
 on:
   pull_request:
@@ -6,15 +6,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  pytest:
+  ruff:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
 
       - uses: actions/setup-python@v5
         with:
@@ -22,6 +17,4 @@ jobs:
 
       - run: pip install -r requirements-dev.txt
 
-      - run: python -m pytest -v
-        env:
-          ROOM67_REQUIRE_SPARK: "1"
+      - run: ruff check .

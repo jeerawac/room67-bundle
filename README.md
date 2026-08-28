@@ -57,8 +57,8 @@ databricks bundle deploy -t dev
 ```
 
 Requires `DATABRICKS_HOST` + `DATABRICKS_TOKEN` (PAT auth). GitHub Actions:
-- `validate.yml` runs `databricks bundle validate -t dev` on every pull request.
-- `test.yml` and `deploy.yml` are `workflow_dispatch`-triggered — run manually from the Actions tab.
+- `lint.yml` (`ruff check .`), `test.yml` (`pytest`), and `validate.yml` (`databricks bundle validate -t dev`) all run on every pull request.
+- `deploy.yml` runs `databricks bundle deploy -t dev` on every push to `main` (i.e. every merge). All four also support manual `workflow_dispatch`.
 
 ## Tests
 

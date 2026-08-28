@@ -3,7 +3,7 @@ part, so it is session-scoped.
 
 Tests marked `spark` need a JVM. On a machine without one they are SKIPPED
 with a single explanatory line rather than raising JAVA_GATEWAY_EXITED once
-per test. CI sets NAMAEW_REQUIRE_SPARK=1, which turns the skip back into a
+per test. CI sets ROOM67_REQUIRE_SPARK=1, which turns the skip back into a
 failure: a runner silently skipping the Spark tests would be a gate that
 proves less than it appears to.
 """
@@ -37,7 +37,7 @@ def pytest_collection_modifyitems(config, items):
     version = _java_version()
     if version is not None and version >= 17:
         return
-    if os.environ.get("NAMAEW_REQUIRE_SPARK") == "1":
+    if os.environ.get("ROOM67_REQUIRE_SPARK") == "1":
         return                      # CI: let the failure be a failure
     reason = (
         "no Java 17+ on this machine, so the Spark tests cannot run "
