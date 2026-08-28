@@ -3,11 +3,12 @@
 # Demo training: fit a trivial linear model (fare_amount ~ trip_distance) on
 # the table the ingest+audit tasks already vouched for. Not production ML,
 # just a smoke test that a downstream task can read the ingested data. The
-# fit/eval logic lives in room67/model.py, unit-tested without Spark.
+# fit/eval logic lives in room67/model.py, the predicted-vs-actual figure in
+# room67/plots.py, both unit-tested without Spark.
 
 # COMMAND ----------
 
-# MAGIC %pip install loguru scikit-learn mlflow
+# MAGIC %pip install loguru scikit-learn mlflow matplotlib
 
 # COMMAND ----------
 
@@ -36,10 +37,11 @@ table = trips_table(catalog)
 import mlflow
 
 from room67.model import fit_and_evaluate
+from room67.plots import figure_predicted_vs_actual
 
 pdf = spark.table(table).dropna(subset=["trip_distance", "fare_amount"]).toPandas()  # noqa: F821
 
-model, rmse, train_df = fit_and_evaluate(pdf)
+model, rmse, train_df, test_df, predictions = fit_and_evaluate(pdf)
 
 # COMMAND ----------
 
@@ -48,6 +50,10 @@ registered_name = model_name(catalog)
 
 with mlflow.start_run():
     mlflow.log_metric("rmse", rmse)
+    mlflow.log_figure(
+        figure_predicted_vs_actual(test_df["fare_amount"], predictions),
+        "predicted_vs_actual.png",
+    )
     info = mlflow.sklearn.log_model(
         model,
         "model",

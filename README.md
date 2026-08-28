@@ -11,7 +11,7 @@ Job `room67` runs daily (`0 0 2 * * ?` UTC):
 3. If retrain gate true: **ingest** → **data_quality** → **train** → **validate** (Write-Audit-Publish: each of the last two fails the run rather than letting a bad table or a bad model flow downstream)
    - `ingest_nyctaxi.py`: copies a 5000-row slice of `samples.nyctaxi.trips` into `{catalog}.m3.room67_trips_raw`.
    - `audit_quality.py`: fails the run if the table just written has nulls, negative values, or is empty.
-   - `train_demo.py`: fits `LinearRegression` (fare_amount ~ trip_distance), logs run + registers model to Unity Catalog as `{catalog}.m3.room67_fare_model`.
+   - `train_demo.py`: fits `LinearRegression` (fare_amount ~ trip_distance), logs RMSE + a predicted-vs-actual figure, registers model to Unity Catalog as `{catalog}.m3.room67_fare_model`.
    - `validate_demo.py`: fails the run if RMSE > `rmse_threshold`; otherwise aliases the new version `champion`.
 4. **infer** — runs `run_if: ALL_DONE` after gate/validate; scores current `champion` model against raw table, writes to `{catalog}.m3.room67_predictions`. Skips gracefully (writes a `status="skipped"` row) if no champion exists yet.
 
@@ -34,12 +34,13 @@ src/
     dates.py                day-of-month logic
     naming.py                table/model naming
     model.py                  fit + evaluate (pandas/scikit-learn only)
-    gate.py                    the RMSE promotion predicate
-    checks.py                  data-quality expectations (Spark)
+    plots.py                   predicted-vs-actual figure (matplotlib only)
+    gate.py                     the RMSE promotion predicate
+    checks.py                    data-quality expectations (Spark)
 tests/
   conftest.py               local Spark session, skipped without Java 17+
   test_bundle_config.py     validates databricks.yml structure
-  test_dates.py, test_naming.py, test_gate.py, test_model.py, test_checks.py
+  test_dates.py, test_naming.py, test_gate.py, test_model.py, test_plots.py, test_checks.py
 ```
 
 ## Variables

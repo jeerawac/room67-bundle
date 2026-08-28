@@ -4,6 +4,7 @@ pyspark==3.5.4
 pandas==2.2.3
 numpy==1.26.4
 scikit-learn==1.5.2
+matplotlib==3.9.2
 ruff==0.6.9
 
 # mlflow is deliberately NOT here. Nothing on the runner imports it: only
